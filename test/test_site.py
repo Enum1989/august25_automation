@@ -3,13 +3,7 @@ import time
 from selenium.webdriver.common.by import By
 from selenium import webdriver
 
-@pytest.fixture()
-def browser():
- browser = webdriver.Firefox()
- browser.maximize_window()
- browser.implicitly_wait(3)
- yield browser
- browser.close()
+
   
 def test_open_s6(browser):
     browser.get('https://demoblaze.com')
