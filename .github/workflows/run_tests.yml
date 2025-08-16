@@ -1,1 +1,55 @@
+# Имя вашего воркфлоу, которое будет отображаться в GitHub
+name: Run auto tests
 
+# Триггеры для запуска
+on:
+  # Позволяет запускать воркфлоу вручную из вкладки "Actions"
+  workflow_dispatch:
+    inputs:
+      # Поле ввода, которое увидит пользователь
+      deployment_target:
+        description: 'Select test suite to run' # Описание поля
+        required: true                       # Поле обязательное для заполнения
+        default: all                     # Значение по умолчанию
+        type: choice                         # Тип поля - выпадающий список
+        options:                             # Варианты в списке
+          - all 
+
+            jobs:
+  # Имя задачи (может быть любым)
+            run-tests:
+    # Указываем, на какой операционной системе запускать тесты
+                runs-on: ubuntu-latest
+
+    # Шаги, из которых состоит задача
+       steps:
+      # Шаг 1: Клонируем репозиторий
+      # Этот экшен загружает ваш код в рабочее окружение GitHub
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Шаг 2: Устанавливаем Python
+      # Этот экшен настраивает нужную версию Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12' # Укажите вашу версию Python
+
+      # Шаг 3: Устанавливаем зависимости
+      # Этот шаг устанавливает все библиотеки, перечисленные в вашем requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Шаг 4: Запускаем Smoke тесты
+      # Этот шаг выполнится, только если пользователь выбрал 'smoke'
+      - name: Run Smoke Tests
+        if: ${{ github.event.inputs.deployment_target == 'smoke' }}
+        run: pytest -m smoke
+
+      # Шаг 5: Запускаем Regression тесты
+      # Этот шаг выполнится, только если пользователь выбрал 'regression'
+      - name: Run Regression Tests
+        if: ${{ github.event.inputs.deployment_target == 'regression' }}
+        run: pytest -m regression
